@@ -25,7 +25,7 @@ def GrowthRecursion(points, totalSpheres, prevRad, prevTrans):
     
     newRad = prevRad*GF
     newTrans = prevTrans*TF
-    if len(totalSpheres) < 15:
+    if len(totalSpheres) < 10:
         GrowthRecursion(outSidePoints, totalSpheres, newRad, newTrans)
 
 def isPtInside(p, sph):
@@ -38,8 +38,7 @@ def isPtInside(p, sph):
     
     dist = rs.Distance(p, centroid[0])
     
-    print rad
-    print dist
+
     
     if dist > rad:
         inside = False
@@ -177,7 +176,7 @@ plane01 = rs.CurvePlane(intersection00) #???
 translation02 = TF
 Aux01 = rs.OffsetCurve(intersection00, plane01 [0], translation02) #???
 rs.ObjectColor(Aux01, (0,255,0))
-
+print plane01 
 #pointsCenter = rs.PlaneCurveIntersection(plane00, Aux01)
 pointsCenter = rs.CurveBrepIntersect(Aux01, plane00)
 print pointsCenter
