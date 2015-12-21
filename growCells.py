@@ -37,13 +37,18 @@ class Sphere:
             return True
             
     def getNewCenterPoints(self,surface,isphere):
-        t = 0.7 # translation factor 
+        t = 0.5# translation factor 
         intersection = rs.IntersectBreps(self.brep,isphere.brep)
-        intersectionPlane = rs.CurvePlane(intersection)
-        scaledIntersection = rs.OffsetCurve(intersection,intersectionPlane[0],t)
+        #different method for finding offset direction
+        p0 = rs.CurveAreaCentroid(intersection)#center of intersection ///   *Message: 'NoneType' object has no attribute 'Centroid'
+        p1 = rs.CurveEndPoint(intersection)#point on intersection
+#        intersectionPlane = rs.CurvePlane(intersection)
+        direction = rs.VectorCreate(p1,p0[0])#Vector of direction
+        scaledIntersection = rs.OffsetCurve(intersection,direction,t)
+        rs.ObjectColor(scaledIntersection, (0,255,0)) #colored intersections to observe correct direction
         # ip[0] = Origin=53.5112860700772,12.7634118321508,102.900274104955 XAxis=-1.09236069576488E-13,1,0, YAxis=-2.18668221722765E-14,-2.38886166598282E-27,-1, ZAxis=-1,-1.09236069576488E-13,2.18668221722765E-14
         # must change offset to be a point outside the curve object
-        rhino_pts = rs.CurveBrepIntersect(scaledIntersection,surface)
+        rhino_pts = rs.CurveBrepIntersect(scaledIntersection,surface)#what happens when there's no intersection???? Message: 'NoneType' object has no attribute 'Centroid' (appears in line 43)*
         intersection_pts = []
         if rhino_pts is not None:
             intersection_pts.append(rhino_pts[1][0])
@@ -77,24 +82,25 @@ def createSpheres(centerPointList,r,color=None):
     ''' creates a list of spheres from a list of center points '''
     newSpheres = []
     for cp in centerPointList:
-#        new = Sphere(cp,r)
-        new = Sphere([0,0,0],20)
-        print cp
+        #get the coordinates of the point for creating spheres
+        cp = rs.PointCoordinates(cp)
+        new = Sphere(cp,r)
+#        new = Sphere([0,0,0],20)
         if color:
             new.setColor(color)
         newSpheres.append(new)
     return newSpheres
 
 def growth(newCells,oldCells,surface,depth):
-    r = 20 # radius could depend on depth 
-    if depth>5:
+    r = 1 # radius could depend on depth 
+    if depth>200: #what the fuck is this for?
         return
     else: 
         # Identify potential growth areas on surface 
         candidateCenterPoints = []
         for new in newCells:
             for old in oldCells:
-                if new.isClose(old):
+                if new.isClose(old): 
                     pts = new.getNewCenterPoints(surface, old)
                     candidateCenterPoints += pts
         # Prune growth areas 
@@ -120,9 +126,9 @@ def growth(newCells,oldCells,surface,depth):
 
 if __name__=="__main__":
     surface = createDemoSurface()
-    initialSphere = Sphere([-50,300,100],20)
+    initialSphere = Sphere([-50,300,100],1)
     initialSphere.setColor((0,255,0))
-    secondSphere = Sphere([-50,315,100],20)
+    secondSphere = Sphere([-50,300.7,100],1)
     newCells = [initialSphere]
     oldCells = [secondSphere]
-    growth(newCells,oldCells,surface,0)
+    growth(newCells,oldCells,surface,100)
