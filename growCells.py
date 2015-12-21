@@ -114,8 +114,9 @@ def growth(newCells,oldCells,surface,depth):
 #        print depth
         oldCells = newCells + oldCells
         newCells = createSpheres(newCenterPoints,r)
-        print newCenterPoints
-        growth(newCells,oldCells,surface,depth+1)
+        depth += 1
+#        print newCenterPoints
+        growth(newCells,oldCells,surface,depth)
 
 if __name__=="__main__":
     surface = createDemoSurface()
